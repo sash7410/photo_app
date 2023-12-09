@@ -1,0 +1,2 @@
+requests==2.25.1  # or whatever the latest version you want to use that is compatible
+urllib3<2  # This will ensure you install a version of urllib3 that is compatible with the OpenSSL in AWS Lambda
