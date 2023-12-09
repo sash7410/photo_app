@@ -343,7 +343,7 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 StackName: CloudComputingHw3 # Name of your existing stack
                 TemplatePath: BuildOutput::other/cloudFormation.yml
-                RoleArn: arn:aws:iam::781036601491:role/cloudformation
+                RoleArn: arn:aws:iam::466579977483:role/photoscloudform
               InputArtifacts:
                 - Name: BuildOutput
               RunOrder: 1
