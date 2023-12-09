@@ -3,7 +3,7 @@ Description: Serverless Frontend CI/CD
 Parameters:
   GitHubRepo:
     Type: String
-    Default: 'CloudComputingHw3'
+    Default: 'photo_app'
 
   GitHubBranch:
     Type: String
@@ -11,11 +11,11 @@ Parameters:
 
   GitHubToken:
     Type: String
-    Default: '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'
+    Default: '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'
 
   GitHubUser:
     Type: String
-    Default: 'ZijieXiong'
+    Default: 'sash7410'
 
 Resources:
   
