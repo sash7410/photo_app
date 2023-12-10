@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>QuickPic</title>
+    <title>photosApp</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">-->
@@ -21,70 +21,37 @@
 </head>
 
 <body>
-<div class="container">
-    <div class="heading">
-        <h1>QuickPic</h1>
-    </div>
-    <div class="card">
-        <h3>Search your photos</h3>
-        <div class="searchbar">
-            <div class="searchbar-wrapper">
-                <div class="searchbar-left" onclick="searchPhoto()">
-                    <div class="search-icon-wrapper">
-                <span class="search-icon searchbar-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="button">
-                        <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z">
-                        </path>
-                    </svg>
-                </span>
-                    </div>
-                </div>
-
-                <div class="searchbar-center">
-                    <div class="searchbar-input-spacer"></div>
-
-                    <input type="text" class="searchbar-input form-control" maxlength="2048" name="search"
-                           autocapitalize="off" id="note-textarea"
-                           autocomplete="off" title="Search" role="combobox" placeholder="Search your photo">
-                </div>
-
-                <div class="searchbar-right">
-                    <svg role="button" class="icon" viewBox="0 0 1024 1024"
-                         width="24px" height="24px" id="start-record-btn">
-                        <path d="M512.002 626.23c-122.93 0-222.938-100.01-222.938-222.938V222.94C289.06 100.01 389.072 0 512.002 0c69.74 0 134.242 31.968 176.974 87.708a223.47 223.47 0 0 1 29.964 52.486c5.898 14.646-1.196 31.3-15.844 37.196-14.646 5.898-31.3-1.198-37.196-15.844a166.256 166.256 0 0 0-22.302-39.052c-31.82-41.51-79.786-65.316-131.594-65.316-91.402 0-165.76 74.362-165.76 165.76v180.35c0 91.402 74.36 165.76 165.76 165.76s165.76-74.362 165.76-165.76c0-15.786 12.8-28.588 28.588-28.588s28.588 12.802 28.588 28.588c0 122.93-100.01 222.942-222.938 222.942z"
-                              fill="#2D527C"></path>
-                        <path d="M512.002 744.918c-188.374 0-341.628-153.25-341.628-341.624v-90.178c0-15.786 12.8-28.588 28.588-28.588s28.588 12.802 28.588 28.588v90.178c0 156.844 127.604 284.448 284.45 284.448 15.79 0 28.588 12.802 28.588 28.588s-12.796 28.588-28.586 28.588zM666.306 704.2c-9.946 0-19.606-5.194-24.878-14.46-7.804-13.726-3.008-31.18 10.716-38.986 89.012-50.63 144.304-145.452 144.304-247.464v-90.178c0-15.786 12.8-28.588 28.588-28.588s28.588 12.802 28.588 28.588v90.178c0 122.524-66.372 236.392-173.212 297.164a28.41 28.41 0 0 1-14.106 3.746z"
-                              fill="#2D527C"></path>
-                        <path d="M317.648 313.116v90.174c0 106.894 87.458 194.352 194.35 194.352 106.894 0 194.35-87.458 194.35-194.352v-90.174h-388.7z"
-                              fill="#CEE8FA"></path>
-                        <path d="M512.002 626.23c-122.93 0-222.938-100.01-222.938-222.938v-90.174c0-15.786 12.8-28.588 28.588-28.588h388.702c15.79 0 28.588 12.802 28.588 28.588v90.174c-0.002 122.926-100.012 222.938-222.94 222.938z m-165.764-284.528v61.586c0 91.402 74.36 165.76 165.76 165.76s165.76-74.362 165.76-165.76v-61.586h-331.52zM512.002 952.782c-15.79 0-28.588-12.802-28.588-28.588V716.328c0-15.786 12.8-28.588 28.588-28.588 15.79 0 28.588 12.802 28.588 28.588v207.866c0 15.79-12.798 28.588-28.588 28.588z"
-                              fill="#2D527C"></path>
-                        <path d="M682.476 995.412H341.524c-35.232 0-63.796-28.564-63.796-63.796s28.564-63.796 63.796-63.796h340.954c35.232 0 63.796 28.564 63.796 63.796-0.002 35.232-28.564 63.796-63.798 63.796z"
-                              fill="#CEE8FA"></path>
-                        <path d="M682.476 1024H341.524c-50.94 0-92.384-41.442-92.384-92.382s41.446-92.382 92.384-92.382h340.954c50.94 0 92.384 41.442 92.384 92.382S733.418 1024 682.476 1024z m-340.952-127.59c-19.414 0-35.208 15.792-35.208 35.204s15.792 35.204 35.208 35.204h340.954c19.414 0 35.208-15.792 35.208-35.204s-15.792-35.204-35.208-35.204H341.524z"
-                              fill="#2D527C"></path>
-                    </svg>
-                </div>
+    <div class="container">
+        <header class="main-header">
+            <h1>QuickPic</h1>
+        </header>
+        <div class="search-section">
+            <h3>Search your photos</h3>
+            <div class="search-bar">
+                <input type="text" class="search-input" id="note-textarea" placeholder="Search your photo">
+                <button class="search-btn" onclick="searchPhoto()">Search</button>
             </div>
         </div>
+        <div class="card">
+            <h3>Upload Files</h3>
+            <div class="drop_box">
+                <header>
+                    <h4>Select File here</h4>
+                </header>
+                <p>Files Supported: PNG, JPEG</p>
+                <!-- The file input is hidden and triggered by the "Choose File" button -->
+                <input id="file_path" type="file" name="file" hidden accept="image/jpeg, image/png">
+                <!-- The "Choose File" button -->
+                <button class="btn" onclick="document.getElementById('file_path').click();">Choose File</button>
+                <!-- Area where the selected file name and custom tag input will be displayed -->
+                <div id="file-display-area"></div>
+            </div>
+        </div>
+        <div class="banner-section" id="img-container">
+            <p id="displaytext"></p>
+        </div>
     </div>
-</div>
-<div class="card">
-    <h3>Upload Files</h3>
-    <div class="drop_box">
-        <header>
-            <h4>Select File here</h4>
-        </header>
-        <p>Files Supported: PNG, JPEG</p>
-        <input id="file_path" type="file" name="search" hidden accept="image/jpeg, image/png" style="display:none;">
-        <button class="btn">Choose File</button>
-    </div>
-</div>
-<div>
-    <div class="banner-section" id="img-container">
-        <p id="displaytext"></p>
-    </div>
-</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="render.js"></script>
 <script src="script.js"></script>
