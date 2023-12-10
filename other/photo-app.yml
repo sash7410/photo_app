@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation Template to create all services in assignment3
+Description: CloudFormation Template to create all services for Photos App
 
 Resources:
   MyOpensearchDomain:
