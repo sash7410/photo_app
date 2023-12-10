@@ -14,31 +14,45 @@ function searchPhoto() {
     };
 
     apigClient
-        .searchGet(params, body, additionalParams)
-        .then(function (res) {
-            var resp_data = res.data;
-            console.log(resp_data)
-            if (resp_data.imagePaths == "No Results found") {
-                document.getElementById('displaytext').innerHTML =
-                    'Sorry could not find the image. Try another search words!';
-                document.getElementById('displaytext').style.display = 'block';
-            }
+    .searchGet(params, body, additionalParams)
+    .then(function (res) {
+        var resp_data = res.data;
+        console.log(resp_data)
+        if (resp_data.imagePaths == "No Results found") {
+            document.getElementById('displaytext').innerHTML =
+                'Sorry could not find the image. Try another search words!';
+            document.getElementById('displaytext').style.display = 'block';
+        }
 
 
-            resp_data.imagePaths.forEach(function (obj) {
-                var img = new Image();
-                console.log(obj);
-                img.src = obj;
+        resp_data.imagePaths.forEach(function (obj) {
+            // Make a GET request to the S3 URL
+            fetch(obj)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
+                return response.text(); // Get the response as text
+              })
+              .then(base64String => {
+                // Create an image element
+                const img = new Image();
+        
+                // Set the source of the image to the decoded Base64 string
+                img.src = `data:image/jpeg;base64,${base64String}`;
                 img.setAttribute('class', 'banner-img');
                 img.setAttribute('alt', 'effy');
-                document.getElementById('displaytext').innerHTML =
-                    'Images returned are : ';
+        
+                // Append the image to an HTML element with ID 'img-container'
                 document.getElementById('img-container').appendChild(img);
-                document.getElementById('displaytext').style.display = 'block';
-            });
-        })
-        .catch(function (result) {
+              })
+              .catch(error => {
+                console.error('There was a problem fetching the image:', error);
+              });
         });
+    })
+    .catch(function (result) {
+    });
 }
 
 function getBase64(file) {

@@ -1,6 +1,7 @@
 import boto3
 import json
 import requests
+import base64
 
 
 def update_elasticsearch_index(index_name, document):
@@ -10,28 +11,27 @@ def lambda_handler(event, context):
     # Retrieve information about the uploaded image from the S3 event
     s3_bucket = event['Records'][0]['s3']['bucket']['name']
     s3_object_key = event['Records'][0]['s3']['object']['key']
+    # Initialize S3 client
+    s3 = boto3.client('s3')
     # Initialize Rekognition client
     rekognition = boto3.client('rekognition')
     # Extract S3 object metadata
+    response = s3.get_object(Bucket=s3_bucket, Key=s3_object_key)
+    base64_encoded_image_content = response['Body'].read()
 
+    # Decode the base64 string
+    decoded_image_content = base64.b64decode(base64_encoded_image_content)
     # Call detectLabels method
     response = rekognition.detect_labels(
-        Image={
-            'S3Object': {
-                'Bucket': s3_bucket,
-                'Name': s3_object_key
-            }
-        },
-        MaxLabels=10,  # Maximum number of labels to return (adjust as needed)
-        MinConfidence=75  # Minimum confidence level for detected labels (adjust as needed)
+        Image={'Bytes': decoded_image_content},
+        MinConfidence=80  # Minimum confidence level for detected labels (adjust as needed)
     )
     
     # Process the response - extract and handle labels
     labels = [label['Name'] for label in response['Labels']]
     print(labels)
     # You can further process or store these labels as needed (e.g., in a database or another AWS service)
-    # Initialize S3 client
-    s3 = boto3.client('s3')
+
     # Retrieve S3 object metadata
     try:
         response = s3.head_object(Bucket=s3_bucket, Key=s3_object_key)
