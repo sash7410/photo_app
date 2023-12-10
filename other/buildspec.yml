@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      python: 3.8  # Change this to match your Lambda's runtime
+      python: 3.11  # Change this to match your Lambda's runtime
 
   pre_build:
     commands:
