@@ -10,8 +10,8 @@ Resources:
         Enabled: true
         InternalUserDatabaseEnabled: true
         MasterUserOptions:
-          # MasterUserName: 'master'
-          # MasterUserPassword: 'Master@123'
+          MasterUserName: 'root'
+          MasterUserPassword: 'Root@123'
         AnonymousAuthEnabled: False
       ClusterConfig:
         InstanceType: 't3.small.search'
