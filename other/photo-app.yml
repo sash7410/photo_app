@@ -1,7 +1,59 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation Template to create all services for Photos App
+Description: A CloudFormation template for services required by Photos App, built for the Fall 2023 Cloud Computing course at NYU Tandon.
 
-Resources:
+Resources:    
+  FrontendS3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: photosappsite
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        # ErrorDocument: error.html
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: False
+        BlockPublicPolicy: False
+        IgnorePublicAcls: False
+        RestrictPublicBuckets: False
+  
+  FrontendS3Policy:
+    Type: 'AWS::S3::BucketPolicy'
+    DeletionPolicy: Delete
+    Properties:
+      Bucket: !Ref FrontendS3Bucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          Effect: 'Allow'
+          Principal: '*'
+          Action: 's3:GetObject'
+          Resource: !Sub 'arn:aws:s3:::${FrontendS3Bucket}/*'
+  
+  PhotoStoreS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: photosbucketb2cc
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: False
+        BlockPublicPolicy: False
+        IgnorePublicAcls: False
+        RestrictPublicBuckets: False
+  
+  PhotoStorePolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    DeletionPolicy: Delete
+    Properties:
+      Bucket: !Ref PhotoStoreS3Bucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          Effect: 'Allow'
+          Principal: '*'
+          Action: 
+            - 's3:GetObject'
+            - 's3:PutObject'
+          Resource: !Sub 'arn:aws:s3:::${PhotoStoreS3Bucket}/*'
+
   PhotosElasticSearchDomain:
     Type: "AWS::OpenSearchService::Domain"
     Properties:
@@ -27,7 +79,7 @@ Resources:
         CustomEndpointEnabled: False
       EBSOptions:
         EBSEnabled: true
-        VolumeSize: 100  # Specify your desired volume size in GB
+        VolumeSize: 100 # Specify your desired volume size in GB
         VolumeType: "gp3"
       SnapshotOptions:
         AutomatedSnapshotStartHour: 0
@@ -35,57 +87,7 @@ Resources:
         Enabled: true
       NodeToNodeEncryptionOptions:
         Enabled: true
-  
-  PhotoStoreS3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: photosbucketb2cc
-      PublicAccessBlockConfiguration: 
-        BlockPublicAcls: False
-        BlockPublicPolicy: False
-        IgnorePublicAcls: False
-        RestrictPublicBuckets: False
-  PhotoStorePolicy:
-    Type: 'AWS::S3::BucketPolicy'
-    DeletionPolicy: Delete
-    Properties:
-      Bucket: !Ref PhotoStoreS3Bucket
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          Effect: 'Allow'
-          Principal: '*'
-          Action: 
-            - 's3:GetObject'
-            - 's3:PutObject'
-          Resource: !Sub 'arn:aws:s3:::${PhotoStoreS3Bucket}/*'
-  
-  FrontendS3Bucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Delete
-    Properties:
-      BucketName: photosappsite
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        # ErrorDocument: error.html
-      PublicAccessBlockConfiguration: 
-        BlockPublicAcls: False
-        BlockPublicPolicy: False
-        IgnorePublicAcls: False
-        RestrictPublicBuckets: False
-  FrontendS3Policy:
-    Type: 'AWS::S3::BucketPolicy'
-    DeletionPolicy: Delete
-    Properties:
-      Bucket: !Ref FrontendS3Bucket
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          Effect: 'Allow'
-          Principal: '*'
-          Action: 's3:GetObject'
-          Resource: !Sub 'arn:aws:s3:::${FrontendS3Bucket}/*'
-  
+
   LambdaFunction1:
     Type: AWS::Lambda::Function
     DeletionPolicy: Delete
@@ -97,6 +99,7 @@ Resources:
       Role: !GetAtt LambdaFunction1ExecutionRole.Arn
       Runtime: python3.11  
       Timeout: 30
+  
   LambdaFunction1ExecutionRole:
     Type: AWS::IAM::Role
     DeletionPolicy: Delete
@@ -109,7 +112,7 @@ Resources:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: LambdaRekognitionAndOpenSearchPolicy
+        - PolicyName: LambdaFunction1Policy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -129,8 +132,13 @@ Resources:
                 Action:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams                  
                   - logs:PutLogEvents
+                  - logs:GetLogEvents
+                  - logs:FilterLogEvents  
                 Resource: arn:aws:logs:*:*:*  
+  
   LambdaFunction1InvokePermission:
     Type: AWS::Lambda::Permission
     DeletionPolicy: Delete
@@ -151,6 +159,7 @@ Resources:
       Role: !GetAtt LambdaFunction2ExecutionRole.Arn
       Runtime: python3.11
       Timeout: 30
+  
   LambdaFunction2ExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -162,56 +171,34 @@ Resources:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-      - PolicyName: LambdaLexFullAccessPolicy
+      - PolicyName: LambdaFunction2Policy
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Action:
-                - lex:PostContent
-                - lex:PostText
-                - lex:PutSession
-                - lex:GetSession
-                - lex:DeleteSession
-                - lex:RecognizeText
-                - lex:RecognizeUtterance
-                - lex:StartConversation
+                - lex:*
               Resource: '*'
             - Effect: Allow
               Action:
                 - logs:CreateLogGroup
                 - logs:CreateLogStream
+                - logs:DescribeLogGroups
+                - logs:DescribeLogStreams                  
                 - logs:PutLogEvents
+                - logs:GetLogEvents
+                - logs:FilterLogEvents  
               Resource: arn:aws:logs:*:*:*
 
-  ApiGatewayS3Role:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: apigateway.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: ApiGatewayS3AccessPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                Resource: !Sub 'arn:aws:s3:::${PhotoStoreS3Bucket}/*'
-  
   PhotosRestApi:
     Type: AWS::ApiGateway::RestApi
     DeletionPolicy: Delete
     Properties:
       EndpointConfiguration: 'REGIONAL'
-      BinaryMediaTypes: ["*/*"]
-      Name: "AI Photo Search"
-      Description: "AI Photo Search application, built during the Cloud and Big Data course at Columbia University."
+      BinaryMediaTypes: ["image/jpg", "image/jpeg", "image/png"]
+      Name: "Photos App"
+      Description: "REST API for Photos App, built for the Fall 2023 Cloud Computing course at NYU Tandon."
+  
   PhotosRestApiUploadResource:
     Type: AWS::ApiGateway::Resource
     DependsOn: PhotosRestApi
@@ -222,6 +209,7 @@ Resources:
         - PhotosRestApi
         - RootResourceId
       PathPart: "upload"
+  
   PhotosRestApiSearchResource:
     Type: AWS::ApiGateway::Resource
     DependsOn: PhotosRestApi
@@ -232,7 +220,8 @@ Resources:
         - PhotosRestApi
         - RootResourceId
       PathPart: "search"
-  PhotosRestApiPutRequest:
+
+  PhotosRestApiPutMethod:
     Type: AWS::ApiGateway::Method
     DependsOn: PhotosRestApiUploadResource
     DeletionPolicy: Delete
@@ -241,16 +230,15 @@ Resources:
       AuthorizationType: NONE
       HttpMethod: PUT
       Integration:
-        Type: AWS
-        Credentials: !GetAtt ApiGatewayS3Role.Arn
+        Type: HTTP_PROXY # fix?
         IntegrationHttpMethod: PUT
         IntegrationResponses:
           - StatusCode: 200
         RequestParameters:
-          integration.request.path.bucket: method.request.header.bucket
-          integration.request.path.key: method.request.header.key
+          integration.request.path.key: method.request.header.key # fix
+          method.request.path.object
           integration.request.header.x-amz-meta-customLabels: method.request.header.x-amz-meta-customLabels
-        Uri: arn:aws:apigateway:us-west-2:s3:path/{bucket}/{key}
+        Uri: arn:aws:apigateway:us-west-2:s3:path/{bucket}/{key} # fix
       MethodResponses:
         - StatusCode: 200
         - StatusCode: 403
@@ -262,7 +250,8 @@ Resources:
         method.request.header.x-amz-meta-customLabels: True
       ResourceId: !Ref PhotosRestApiUploadResource
       RestApiId: !Ref PhotosRestApi
-  PhotosRestApiGetRequest:
+  
+  PhotosRestApiGetMethod:
     Type: AWS::ApiGateway::Method
     DependsOn: PhotosRestApiSearchResource
     DeletionPolicy: Delete
@@ -271,8 +260,8 @@ Resources:
       AuthorizationType: NONE
       HttpMethod: GET
       Integration:
-        Type: AWS
-        IntegrationHttpMethod: GET
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
         IntegrationResponses:
           - StatusCode: 200
         RequestTemplates:
@@ -289,12 +278,13 @@ Resources:
         method.request.querystring.q: True
       ResourceId: !Ref PhotosRestApiSearchResource
       RestApiId: !Ref PhotosRestApi
+  
   PhotosRestApiDeployment:
     Type: AWS::ApiGateway::Deployment
     DeletionPolicy: Delete
     DependsOn:
-      - PhotosRestApiPutRequest
-      - PhotosRestApiGetRequest
+      - PhotosRestApiPutMethod
+      - PhotosRestApiGetMethod
     Properties:
       RestApiId: !Ref PhotosRestApi
       StageName: prod
