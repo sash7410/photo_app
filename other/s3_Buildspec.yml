@@ -1,0 +1,17 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Starting the build process"
+  build:
+    commands:
+      - echo "Nothing to build for pure HTML/JavaScript"
+  post_build:
+    commands:
+      - echo "Build and artifact preparation complete"
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: 'frontend'
