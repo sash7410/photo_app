@@ -28,3 +28,4 @@ artifacts:
     - lambda_function_1.zip
     - lambda_function_2.zip
     - other/lambdas.yml
+
