@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: CloudFormation Template to create all services for Photos App
 
 Resources:
-  MyOpensearchDomain:
+  PhotosElasticSearchDomain:
     Type: "AWS::OpenSearchService::Domain"
     Properties:
       DomainName: "photos"
