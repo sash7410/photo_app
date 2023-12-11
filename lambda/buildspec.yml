@@ -3,29 +3,28 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      python: 3.8  # Change this to match your Lambda's runtime
-
+      python: 3.11
+  
   pre_build:
     commands:
-      - echo Running tests...
-      # Add commands to run your tests here (if any)
+      - echo "Running pre-build commands..."
 
   build:
     commands:
-      - ls
-      - echo Building Lambda function 1...
-      - cd lambda/index-photos
+      - echo "Building Lambda function 1..."
+      - cd ../lambda/index-photos
       - pip install -r requirements.txt -t ./
       - zip -r ../lambda_function_1_v2.zip *
       - aws s3 cp ../lambda_function_1_v2.zip s3://$LAMBDA_BUCKET
-      - cd ../lf2
+
+      - echo "Building Lambda function 2"
+      - cd ../lambda/lf2
       - pip install -r requirements.txt -t ./
       - zip -r ../lambda_function_2.zip *
       - aws s3 cp ../lambda_function_2.zip s3://$LAMBDA_BUCKET
 
 artifacts:
   files:
-    - lambda/lambda_function_1_v2.zip
-    - lambda/lambda_function_2.zip
-    - other/cloudFormation.yml
-
+    - lambda_function_1_v2.zip
+    - lambda_function_2.zip
+    - other/lambdas.yml
