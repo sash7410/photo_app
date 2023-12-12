@@ -1,12 +1,16 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: A CloudFormation template for services required by Photos App, built for the Fall 2023 Cloud Computing course at NYU Tandon.
+Parameters:
+  UniqueString:
+    Description: Unique string to ensure resource names are unique
+    Type: String
 
 Resources:    
   FrontendS3Bucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete
     Properties:
-      BucketName: !Sub "photosappsite"
+      BucketName: !Sub "photosappsite-${UniqueString}"
       WebsiteConfiguration:
         IndexDocument: index.html
         # ErrorDocument: error.html
@@ -32,7 +36,7 @@ Resources:
   PhotoStoreS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "photosbucketb2cc"
+      BucketName: !Sub "photosbucketb2cc-${UniqueString}"
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: False
         BlockPublicPolicy: False
@@ -57,7 +61,7 @@ Resources:
   PhotosElasticSearchDomain:
     Type: "AWS::OpenSearchService::Domain"
     Properties:
-      DomainName: !Sub "photos"
+      DomainName: !Sub "photos-${UniqueString}"
       AdvancedSecurityOptions:
         Enabled: true
         InternalUserDatabaseEnabled: true
@@ -196,7 +200,7 @@ Resources:
     Type: AWS::ApiGateway::RestApi
     DeletionPolicy: Delete
     Properties:
-      Name: !Sub "Photos-App-API"
+      Name: !Sub "Photos-App-API-${UniqueString}"  # Ensure this is a unique name
       EndpointConfiguration:
         Types:
           - REGIONAL
@@ -233,34 +237,6 @@ Resources:
         - RootResourceId
       PathPart: "search-v2"
 
-  PhotosRestApiPutMethod:
-    Type: AWS::ApiGateway::Method
-    # DependsOn: PhotosRestApiUploadResource
-    DeletionPolicy: Delete
-    Properties:
-      ApiKeyRequired: False
-      AuthorizationType: NONE
-      HttpMethod: PUT
-      Integration:
-        Type: HTTP_PROXY
-        IntegrationHttpMethod: PUT
-        IntegrationResponses:
-          - StatusCode: 200
-        RequestParameters:
-          integration.request.path.object: 'method.request.path.object'
-          integration.request.header.x-amz-meta-customLabels: 'method.request.header.x-amz-meta-customLabels'
-        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/${PhotoStoreS3Bucket}/${!method.request.path.object}"
-        MethodResponses:
-        - StatusCode: 200
-        - StatusCode: 403
-        - StatusCode: 500
-      OperationName: "/upload"
-      RequestParameters:
-        method.request.header.bucket: True
-        method.request.header.key: True
-        method.request.header.x-amz-meta-customLabels: True
-      ResourceId: !Ref PhotosRestApiUploadResource
-      RestApiId: !Ref PhotosRestApi
   # OPTIONS method on /upload
   UploadOPTIONSMethod:
     Type: AWS::ApiGateway::Method
@@ -279,7 +255,62 @@ Resources:
               application/json: ""
             ResponseParameters:
               method.response.header.Access-Control-Allow-Methods: "'PUT,POST,OPTIONS'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-amz-meta-customLabels'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: "Empty"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  PhotosRestApiPutMethod:
+    Type: AWS::ApiGateway::Method
+    # DependsOn: PhotosRestApiUploadObjectResource
+    Properties:
+      RestApiId: !Ref PhotosRestApi
+      ResourceId: !Ref PhotosRestApiUploadObjectResource  # Reference to resource with path parameter
+      HttpMethod: PUT
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationHttpMethod: PUT
+        # Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/${PhotoStoreS3Bucket}/{object}"
+        RequestParameters:
+          integration.request.path.object: 'method.request.path.object'
+          integration.request.header.x-amz-meta-customLabels: 'method.request.header.x-amz-meta-customLabels'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: "{}"
+      RequestParameters:
+        method.request.path.object: true
+        method.request.header.x-amz-meta-customLabels: false  # Set to true if required
+      MethodResponses:
+        - StatusCode: 200
+        - StatusCode: 403
+        - StatusCode: 500
+      OperationName: "upload"
+  ObjectOPTIONSMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref PhotosRestApi  # Replace with your API Gateway RestApi ID
+      ResourceId: !Ref PhotosRestApiUploadObjectResource  # Replace with the resource ID for your /{object} path
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: ""
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'PUT,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-amz-meta-customLabels'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
       MethodResponses:
         - StatusCode: 200
