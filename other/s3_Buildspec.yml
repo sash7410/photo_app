@@ -3,15 +3,15 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo "Starting the build process"
+      - echo "Initiating build process..."
   build:
     commands:
-      - echo "Nothing to build for pure HTML/JavaScript"
+      - echo "No compilation needed for static content."
   post_build:
     commands:
-      - echo "Build and artifact preparation complete"
+      - echo "Build process and artifact packaging finished."
 
 artifacts:
   files:
     - '**/*'
-  base-directory: 'frontend'
+  base-directory: '../frontend' 
