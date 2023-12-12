@@ -96,6 +96,7 @@ Resources:
     Type: AWS::Lambda::Function
     DeletionPolicy: Delete
     Properties:
+      FunctionName: "LambdaFunction1"
       Code:
         S3Bucket: photolambdafunctions
         S3Key: lambda_function_1.zip 
@@ -156,6 +157,7 @@ Resources:
   LambdaFunction2:
     Type: AWS::Lambda::Function
     Properties:
+      FunctionName: "LambdaFunction2"
       Code:
         S3Bucket: photolambdafunctions
         S3Key: lambda_function_2.zip
@@ -207,7 +209,7 @@ Resources:
   
   PhotosRestApiUploadResource:
     Type: AWS::ApiGateway::Resource
-    DependsOn: PhotosRestApi
+    # DependsOn: PhotosRestApi
     DeletionPolicy: Delete
     Properties:
       RestApiId: !Ref PhotosRestApi
@@ -218,7 +220,7 @@ Resources:
       PathPart: "upload-v2"
   PhotosRestApiUploadObjectResource:
     Type: AWS::ApiGateway::Resource
-    DependsOn: PhotosRestApiUploadResource
+    # DependsOn: PhotosRestApiUploadResource
     Properties:
       RestApiId: !Ref PhotosRestApi
       ParentId: !Ref PhotosRestApiUploadResource
@@ -263,23 +265,54 @@ Resources:
       #   method.request.header.x-amz-meta-customLabels: True
       # ResourceId: !Ref PhotosRestApiUploadResource
       # RestApiId: !Ref PhotosRestApi
+  # OPTIONS method on /upload
+  UploadOPTIONSMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref PhotosRestApi # Replace with your API Gateway resource name
+      ResourceId: !Ref PhotosRestApiUploadResource # Replace with the resource ID for the upload path
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: ""
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'PUT,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-amz-meta-customLabels'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: "Empty"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Origin: true
+
   PhotosRestApiPutMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: PhotosRestApiUploadObjectResource
+    # DependsOn: PhotosRestApiUploadObjectResource
     Properties:
       RestApiId: !Ref PhotosRestApi
       ResourceId: !Ref PhotosRestApiUploadObjectResource  # Reference to resource with path parameter
       HttpMethod: PUT
       AuthorizationType: NONE
       Integration:
-        Type: HTTP_PROXY
+        Type: MOCK
         IntegrationHttpMethod: PUT
-        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/${PhotoStoreS3Bucket}/{object}"
+        # Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/${PhotoStoreS3Bucket}/{object}"
         RequestParameters:
           integration.request.path.object: 'method.request.path.object'
           integration.request.header.x-amz-meta-customLabels: 'method.request.header.x-amz-meta-customLabels'
         IntegrationResponses:
           - StatusCode: 200
+            ResponseTemplates:
+              application/json: "{}"
       RequestParameters:
         method.request.path.object: true
         method.request.header.x-amz-meta-customLabels: false  # Set to true if required
@@ -288,6 +321,34 @@ Resources:
         - StatusCode: 403
         - StatusCode: 500
       OperationName: "upload"
+  ObjectOPTIONSMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref PhotosRestApi  # Replace with your API Gateway RestApi ID
+      ResourceId: !Ref PhotosRestApiUploadObjectResource  # Replace with the resource ID for your /{object} path
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: ""
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'PUT,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-amz-meta-customLabels'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: "Empty"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Origin: true
+
 
   PhotosRestApiGetMethod:
     Type: AWS::ApiGateway::Method
