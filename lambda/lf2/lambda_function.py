@@ -90,6 +90,7 @@ def build_image_urls_from_search_results(search_results):
         image_urls.append(image_url)
     return image_urls
 
+
 def build_response(status_code, body):
     return {
         'statusCode': status_code,
