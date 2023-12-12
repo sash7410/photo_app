@@ -36,5 +36,4 @@ artifacts:
     - lambda_function_2.zip
     - other/lambdas.yml
     - other/photo-app.yml
-    - other/myparams.json
 
