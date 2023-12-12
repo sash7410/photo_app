@@ -18,7 +18,6 @@ phases:
       - ls
       - pwd
       - ls ../
-      - ls ../../
       - echo "Building Lambda function 1..."
       - cd lambda/index-photos
       - pip install -r requirements.txt -t ./
